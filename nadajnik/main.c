@@ -2,9 +2,7 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
-
-typedef unsigned char  u8;
-typedef  unsigned int  uint;
+#define GOKART 10 //numer gokarta
 
 void led_on()
 { 
@@ -26,23 +24,23 @@ void timer_clear()
 	TCCR1B = 0;
 }
 
- void send_cmd(uint cmd)
+ void send_cmd(unsigned int cmd) //http://hobby.abxyz.bplaced.net/index.php?pid=3&aid=16
  {
-    uint m;
+    unsigned int m;
 
-    // doł±cza 2 bity startowe 
+    //2 bity startowe
     cmd |= (3<<12); 
 
     for(m=(1<<13); m>0; m>>=1)
     {
-       if(cmd & m)// je¶li bit o warto¶ci 1
+       if(cmd & m)//jeśli jedynka
        {   
            led_off();
            _delay_ms(0.89); // czas trwania połowy bitu 
            led_on();
            _delay_ms(0.89);
        }
-       else // je¶li bit o warto¶ci 0 
+       else //jeśli zero
        {   
            led_on(); 
            _delay_ms(0.89);
@@ -56,8 +54,8 @@ void timer_clear()
 
 int main(void)
 {
-   u8 cmd;
-   u8 toggle = 0 ;  
+   unsigned char cmd;
+   unsigned char toggle = 0 ;  
 
    // PB1(OC1A) to nasz ledek
    DDRB = (1<<PB1);
@@ -67,15 +65,14 @@ int main(void)
    OCR1AL = 132; 
  
    while(1)
-     {
-        // wysyłamy numerek 13
-        cmd =  10|((toggle & 0x01)<<11);
+   {
+		// wysyłamy numer gokarta, ze zmienionym toggle (może wywalić toggla?)
+        cmd =  GOKART|((toggle & 0x01)<<11);
         toggle++;
   
-        // Wysyła  komendę 
         send_cmd(cmd); 
         _delay_ms(89); // 50 bitów "ciszy"
-     }
+   }
 }
 
 

@@ -1,56 +1,24 @@
-//---------------------------------------------------------------
-//   Plik "main.c"
-//
-//   KURS AVR-GCC (abxyz.bplaced.net)
-// 
-//   Dekoder  RC5
-// 
-//   (schemat i opis dzia³ania w artykule)
-//   testowanie na atmega8 (8MHz)
-//---------------------------------------------------------------
-
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
-// Odbiornik podczerwieni SFH5110  przy³¹czona do portu  PB0 
-#define RC5_IN   (PIND & (1<<3))
 
-//
-typedef unsigned char u8;
-typedef unsigned int  uint;
+#define RC5_IN  (PIND & (1<<3))
 
-// Zmienne globalne pe³ni¹ rolê  programowych zegarów
-// napêdzanych przerwaniem TIMER0_OVF
-volatile u8 timerL; 
-volatile u8 timerH; 
+volatile unsigned char timerL; 
+volatile unsigned char timerH; 
 
-//---------------------------------------------------------------
-// Funkcja konfiguruje i uruchamia Timer0 
-// oraz w³¹cza przerwanie od przepe³nienia timera,
-// przerwanie powinno wystêpowaæ co 32us.  
-//---------------------------------------------------------------
 void init_rc5(void)
 {
-  //atmega8
-  TCCR0 = (1<<CS00);  // w³¹cza Timer0  
-  TIMSK = (1<<TOIE0); // w³¹cza przerwanie "Timer0 Overflow"
+	TCCR0 = (1<<CS00);  // w³¹cza Timer0  
+	TIMSK = (1<<TOIE0); // w³¹cza przerwanie "Timer0 Overflow"
 
-/*
-  //atmega88
-  TCCR0B = (1<<CS00);
-  TIMSK0 = (1<<TOIE0);
-*/
-  // Zezwala na przerwania 
-  sei();
+	sei();
 }
 
-//---------------------------------------------------------------
-// Procedura obs³ugi przerwania  Timer0 Overflow"
-//---------------------------------------------------------------
 ISR(TIMER0_OVF_vect)
 {
-   volatile  static u8 inttemp;
+   volatile static unsigned char inttemp;
 
    // zmienna timerL zwiêksza siê co 32us
    timerL++;
@@ -60,16 +28,13 @@ ISR(TIMER0_OVF_vect)
    if(!inttemp ) timerH++;
 }
 
-//---------------------------------------------------------------
-// Funkcja wykrywa i dekoduje  komendê pilota RC5                                             
-//---------------------------------------------------------------
- uint detect(void)
+ unsigned int detect(void) //http://hobby.abxyz.bplaced.net/index.php?pid=3&aid=16
  {
-    u8 temp;
-    u8 ref1;
-    u8 ref2;
-    u8 bitcnt;
-    uint command;
+    unsigned char temp;
+    unsigned char ref1;
+    unsigned char ref2;
+    unsigned char bitcnt;
+    unsigned int command;
 
     timerH  = 0;
     timerL  = 0;
@@ -163,60 +128,27 @@ ISR(TIMER0_OVF_vect)
    // bity 0..5 numer przycisku
    // bity 6..10  kod systemu(urz¹dzenia)
    // bit 11 toggle bit
+   
+   //obcinamy toggle bit, nie jest nam potrzebny:)   
+   command &= ~(1 << 11);
+   
    return command;
  }
 
-void init_uart(void){
-	unsigned int ubrr = 8000000 / 16 / 9600 - 1;
-	/* Set baud rate*/
-	UBRRH = (unsigned char)(ubrr>>8);
-	UBRRL = (unsigned char)ubrr;
-	/* Enable receiver and transmitter*/
-	UCSRB = (1<<RXEN)|(1<<TXEN);
-	/* Set frame format: 8data, 2stop bit*/
-	UCSRC = (1<<URSEL)|(1<<USBS)|(3<<UCSZ0);
-}
 
-/*void send_uart(cmd){
-	PORTD |= (1<<2); //ustawiamy pin DATA
-
-	while( !( UCSRA & (1<<UDRE)) )
-	;
-	
-	UDR = cmd;
-	PORTD = (PORTD & 0b11111011); //zerujemy pin DATA
-}*/
- 
- unsigned char receive_uart(void){
-	/* Wait for data to be received*/
-	while( !(UCSRA & (1<<RXC)) )
-	;
-	/* Get and return received data from buffer*/
-	return UDR;
- }
- 
-//---------------------------------------------------------------
-// GLÓWNA FUNKCJA PROGRAMU                                                   
-//---------------------------------------------------------------
 int main(void)
 {
-  //
-  uint cmd;
+  unsigned int cmd;
 
-
-  DDRD |= (1<<2); //DATA pin init
+  DDRD |= (1 << PD2) | (1 << PD1); //DATA pin init
   DDRC = 0xff;
-  // uruchamia Timer0 i przerwanie
-  init_rc5();
-  
-  //uruchomienie UARTa
-  init_uart();
+  init_rc5();  
 
   while (1)
   {
      // Wykrywa i dekoduje polecenie pilota RC5 
      cmd = detect();
-
+	 
      // Jeœli odebrano komendê 
      if(cmd == 10)
      {  
