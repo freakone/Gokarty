@@ -152,7 +152,12 @@ int main(void)
      // Jeœli odebrano komendê 
      if(cmd == 10)
      {  
-		PORTC = 0xff;
+		PORTC |= (1 << PC0);
+     }
+	 
+	 if(cmd == 1)
+     {  
+		PORTC |= (1 << PC1);
      }
   }
 
