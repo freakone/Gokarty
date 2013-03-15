@@ -10,7 +10,7 @@ volatile unsigned char timerH;
 
 void init_rc5(void)
 {
-	TCCR0 = (1<<CS00);  // w³¹cza Timer0  
+	TCCR0 = (1<<CS00);  // wlacza Timer0  
 	TIMSK = (1<<TOIE0); // w³¹cza przerwanie "Timer0 Overflow"
 
 	sei();
