@@ -191,7 +191,7 @@ unsigned char i=0;
      {  
 		USARTWriteChar('G');
 		USARTWriteChar(':');		
-		USARTWriteChar(cmd);
+		USARTWriteChar((cmd+48)); // narazie dla jednoznakowych
 		USARTWriteChar('\r'); //CR=LF
 		USARTWriteChar('\n');
 		_delay_ms(1); //haxxx

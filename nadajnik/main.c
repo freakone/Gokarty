@@ -2,7 +2,7 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
-#define GOKART 10 //numer gokarta
+#define GOKART 1 //numer gokarta
 
 void led_on()
 { 
