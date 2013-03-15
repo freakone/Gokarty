@@ -11,7 +11,7 @@ volatile unsigned char timerH;
 void init_rc5(void)
 {
 	TCCR0 = (1<<CS00);  // wlacza Timer0  
-	TIMSK = (1<<TOIE0); // w≥πcza przerwanie "Timer0 Overflow"
+	TIMSK = (1<<TOIE0); // w‚â•œÄcza przerwanie "Timer0 Overflow"
 
 	sei();
 }
@@ -20,10 +20,10 @@ ISR(TIMER0_OVF_vect)
 {
    volatile static unsigned char inttemp;
 
-   // zmienna timerL zwiÍksza siÍ co 32us
+   // zmienna timerL zwi√çksza si√ç co 32us
    timerL++;
 
-   // zmienna timerH  zwiÍksza siÍ co 8.192ms (32us*256) 
+   // zmienna timerH  zwi√çksza si√ç co 8.192ms (32us*256) 
    inttemp++;
    if(!inttemp ) timerH++;
 }
@@ -39,9 +39,9 @@ ISR(TIMER0_OVF_vect)
     timerH  = 0;
     timerL  = 0;
 
-    // Czeka na okres ciszy na linii wejúcia uC trwajπcy  3.5ms
-    // Jeúli nie wykryje takiego okresu ciszy w ciπgu 131ms,
-    // to koÒczy dzia≥anie funkcji z b≥Ídem
+    // Czeka na okres ciszy na linii wej√∫cia uC trwajœÄcy  3.5ms
+    // Je√∫li nie wykryje takiego okresu ciszy w ciœÄgu 131ms,
+    // to ko√íczy dzia‚â•anie funkcji z b‚â•√çdem
     while( timerL<110)
     {
        if(timerH>=16)  return  command = -1;
@@ -50,16 +50,16 @@ ISR(TIMER0_OVF_vect)
     }
 
     // Czeka na  pierwszy bit startowy. 
-    // Jeúli nie wykryje bitu startowego w ciπgu 131ms,
-    // to koÒczy dzia≥anie funkcji z b≥Ídem
+    // Je√∫li nie wykryje bitu startowego w ciœÄgu 131ms,
+    // to ko√íczy dzia‚â•anie funkcji z b‚â•√çdem
     while(RC5_IN)  
          if(timerH>=16)  return command = -1 ;
 
 
-    // Pomiar czasu trwani niskiego poziom sygan≥u 
+    // Pomiar czasu trwani niskiego poziom sygan‚â•u 
     // w pierwszym bicie startowym.
-    // Jeúli nie wykryje rosnπcego zbocza sygna≥u w ciπgu  
-    // 1ms, to koÒczy dzia≥anie funkcji z b≥Ídem 
+    // Je√∫li nie wykryje rosnœÄcego zbocza sygna‚â•u w ciœÄgu  
+    // 1ms, to ko√íczy dzia‚â•anie funkcji z b‚â•√çdem 
     timerL = 0;
     while(!RC5_IN)
          if(timerL>34) return command = -1;
@@ -75,58 +75,58 @@ ISR(TIMER0_OVF_vect)
     ref2 =(temp<<1)+(temp>>1);
 
  
-    // Oczekuje na zbocze opadajπce sygna≥u w úrodku drugiego
+    // Oczekuje na zbocze opadajœÄce sygna‚â•u w √∫rodku drugiego
     // bitu startowego.
-    // Jeúli nie wykryje zbocza w ciπgu 3/4 czasu trwania 
-    // bitu, to koÒczy dzia≥anie funkcji z b≥Ídem 
+    // Je√∫li nie wykryje zbocza w ciœÄgu 3/4 czasu trwania 
+    // bitu, to ko√íczy dzia‚â•anie funkcji z b‚â•√çdem 
     while(RC5_IN)
          if(timerL > ref1) return command = -1;
 
-    // W momencie wykrycia zbocza sygna≥u, synchronizuje
-    // zmienπ timerL dla prÛbkowania  bitu toggle
+    // W momencie wykrycia zbocza sygna‚â•u, synchronizuje
+    // zmienœÄ timerL dla pr√õbkowania  bitu toggle
     timerL = 0;
 
-    // Odczytuje dekoduje pozosta≥e 12 bitÛw polecenia rc5
+    // Odczytuje dekoduje pozosta‚â•e 12 bit√õw polecenia rc5
     for(bitcnt=0, command = 0; bitcnt <12; bitcnt++)
     {
        // Czeka 3/4 czasu trwania bitu od momentu wykrycia
-       // zbocza sygna≥u w po≥owie poprzedniego bitu 
+       // zbocza sygna‚â•u w po‚â•owie poprzedniego bitu 
        while(timerL < ref1) {};
  
-       // PrÛbkuje - odczytuje port we  uC
+       // Pr√õbkuje - odczytuje port we  uC
        if(!RC5_IN)
        {
-          // Jeúli odczytano 0, zapamiÍtuje w zmiennej 
-          // "command" bit o wartoúci 0         
+          // Je√∫li odczytano 0, zapami√çtuje w zmiennej 
+          // "command" bit o warto√∫ci 0         
           command <<= 1 ;
 
-          // Oczekuje na zbocze rosnπce sygna≥u w úrodku bitu.
-          // Jeúli nie wykryje zbocza w ciπgu 5/4 czasu trwania 
-          // bitu, to koÒczy dzia≥anie funkcji z b≥Ídem    
+          // Oczekuje na zbocze rosnœÄce sygna‚â•u w √∫rodku bitu.
+          // Je√∫li nie wykryje zbocza w ciœÄgu 5/4 czasu trwania 
+          // bitu, to ko√íczy dzia‚â•anie funkcji z b‚â•√çdem    
           while(!RC5_IN)
              if(timerL > ref2) return command = -1;
        }
        else
        {
-          // Jeúli odczytano 1, zapamiÍtuje w zmiennej 
-          // "command" bit o wartoúci 1  
+          // Je√∫li odczytano 1, zapami√çtuje w zmiennej 
+          // "command" bit o warto√∫ci 1  
           command = (command <<1 ) | 0x01;
 
-          // Oczekuje na zbocze opadajπce sygna≥u w úrodku bitu.
-          // Jeúli nie wykryje zbocza w ciπgu 5/4 czasu trwania 
-          // bitu, to koÒczy dzia≥anie funkcji z b≥Ídem 
+          // Oczekuje na zbocze opadajœÄce sygna‚â•u w √∫rodku bitu.
+          // Je√∫li nie wykryje zbocza w ciœÄgu 5/4 czasu trwania 
+          // bitu, to ko√íczy dzia‚â•anie funkcji z b‚â•√çdem 
           while(RC5_IN)
              if(timerL > ref2) return command = -1;
        }
 
-       // W momencie wykrycia zbocza sygna≥u, synchronizuje
-       // zmienπ timerL dla prÛbkowania kolejnego bitu
+       // W momencie wykrycia zbocza sygna‚â•u, synchronizuje
+       // zmienœÄ timerL dla pr√õbkowania kolejnego bitu
        timerL = 0;
    }
 
    // Zwraca kod polecenia rc5
    // bity 0..5 numer przycisku
-   // bity 6..10  kod systemu(urzπdzenia)
+   // bity 6..10  kod systemu(urzœÄdzenia)
    // bit 11 toggle bit
    
    //obcinamy toggle bit, nie jest nam potrzebny:)   
@@ -136,24 +136,75 @@ ISR(TIMER0_OVF_vect)
  }
 
 
+void USARTInit(uint16_t ubrr_value)
+{
+   
+
+   UBRRL = ubrr_value;
+   UBRRH = (ubrr_value>>8);
+
+   /*Set Frame Format
+   >> Asynchronous mode
+   >> No Parity
+   >> 1 StopBit
+   >> char size 8
+   */
+   UCSRC=(1<<URSEL)|(3<<UCSZ0);
+
+   UCSRB=(1<<RXEN)|(1<<TXEN);
+}
+
+
+
+void USARTWriteChar(char data)
+{
+   PORTD |= (1<<2);
+   while(!(UCSRA & (1<<UDRE)));
+   UDR=data;
+}
+
+unsigned char USARTReadChar( void ) {
+	PORTD &= ~(1<<2);
+	while ( !(UCSRA & (1<<RXC)) );
+	return UDR;
+}
+
+
 int main(void)
 {
   unsigned int cmd;
+unsigned char i=0;
 
-  DDRD |= (1 << PD2) | (1 << PD1); //DATA pin init
+  DDRD |= (1 << PD2) | (1 << PD1); //RX+DATA pin init
+  DDRD &= ~(1<<0); //TX
   DDRC = 0xff;
-  init_rc5();  
+  init_rc5(); 
+  USARTInit(51); 
 
   while (1)
   {
      // Wykrywa i dekoduje polecenie pilota RC5 
      cmd = detect();
 	 
-     // Jeúli odebrano komendÍ 
-     if(cmd == 10)
+     // Je√∫li odebrano komend√ç 
+     if(cmd != -1)
      {  
-		PORTC = 0xff;
-     }
+		USARTWriteChar('G');
+		USARTWriteChar(':');		
+		USARTWriteChar(cmd);
+		USARTWriteChar('\r'); //CR=LF
+		USARTWriteChar('\n');
+		_delay_ms(1); //haxxx
+		PORTC = 0xff;		
+	}
+	if (i == 10){   // zeby sprawdzic czy uklad chodzi jak cza.
+		USARTWriteChar('-');
+		USARTWriteChar('-');
+		USARTWriteChar('\n');
+		USARTWriteChar('\r');
+		i=0;	
+	}
+	i++;
   }
 
   return 0;
