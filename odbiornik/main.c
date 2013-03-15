@@ -203,8 +203,8 @@ unsigned char i=0;
 		USARTWriteChar('\n');
 		USARTWriteChar('\r');
 		i=0;	
-	}
-	i++;
+    }
+    i++;
   }
 
   return 0;
