@@ -9,14 +9,14 @@ typedef  unsigned int  uint;
 void led_on()
 { 
 	TCCR1A = (1 << COM1A0); //oc1a toggle on compare match
-	TCRR1B = (1 << WGM12) | (1 << CS10); //ctc, no prescaler
+	TCCR1B = (1 << WGM12) | (1 << CS10); //ctc, no prescaler
 	TCCR1C = (1 << FOC1A); // force output compare
 }
 
 void led_off()
 {
 	TCCR1A = (1 << COM1A1); //oc1a clear on compate match
-	TCRR1B = (1 << WGM12) | (1 << CS10); //ctc, no prescaler
+	TCCR1B = (1 << WGM12) | (1 << CS10); //ctc, no prescaler
 	TCCR1C = (1 << FOC1A); // force output compare
 }
 
@@ -25,7 +25,6 @@ void timer_clear()
 	TCCR1A = 0;
 	TCCR1B = 0;
 }
-
 
  void send_cmd(uint cmd)
  {
@@ -70,7 +69,7 @@ int main(void)
    while(1)
      {
         // wysyłamy numerek 13
-        cmd =  13|((toggle & 0x01)<<11);
+        cmd =  10|((toggle & 0x01)<<11);
         toggle++;
   
         // Wysyła  komendę 
