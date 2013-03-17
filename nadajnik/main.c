@@ -2,7 +2,7 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
-#define GOKART 1 //numer gokarta
+#define GOKART 20 //numer gokarta
 
 void led_on()
 { 
@@ -29,9 +29,9 @@ void timer_clear()
     unsigned int m;
 
     //2 bity startowe
-    cmd |= (3<<12); 
+    cmd |= (3<<6); 
 
-    for(m=(1<<13); m>0; m>>=1)
+    for(m=(1<<7); m>0; m>>=1)
     {
        if(cmd & m)//jeśli jedynka
        {   
@@ -54,9 +54,6 @@ void timer_clear()
 
 int main(void)
 {
-   unsigned char cmd;
-   unsigned char toggle = 0 ;  
-
    // PB1(OC1A) to nasz ledek
    DDRB = (1<<PB1);
    
@@ -66,11 +63,7 @@ int main(void)
  
    while(1)
    {
-		// wysyłamy numer gokarta, ze zmienionym toggle (może wywalić toggla?)
-        cmd =  GOKART|((toggle & 0x01)<<11);
-        toggle++;
-  
-        send_cmd(cmd); 
+        send_cmd(GOKART); 
         _delay_ms(89); // 50 bitów "ciszy"
    }
 }
